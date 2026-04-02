@@ -3,6 +3,7 @@ import PHIconButton from "@/src/components/Buttons/PHIconButton";
 import { PHColors } from "@/src/constants/PHColors";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import { Image } from "expo-image";
 import { Stack } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -10,6 +11,10 @@ export default function Index() {
 	return (
 		<View style={styles.container}>
 			<Stack.Screen options={{ headerShown: false }} />
+			<Image
+				source={require("@/assets/user/mainMenuLogo.png")}
+				style={styles.image}
+			/>
 			<View style={styles.textContainer}>
 				<Text style={styles.title}>Olá!</Text>
 				<Text style={styles.subtitle}>
@@ -90,4 +95,5 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		userSelect: "none",
 	},
+	image: { width: 250, height: 200, marginBottom: 20 },
 });
