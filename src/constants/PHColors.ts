@@ -3,7 +3,9 @@ export const PHColors = {
     foreground: "#5C6B73",
     border: "#C2DFE3",
     placeholder: "#9DB4C0",
-    text: "#E0FBFC"
+    text: "#E0FBFC",
+    googleBackground: "#4285F4",
+    googleBorder: "#20437a"
 };
 
 /* 
