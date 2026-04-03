@@ -1,5 +1,6 @@
 import React from "react";
 import {
+	ActivityIndicator,
 	GestureResponderEvent,
 	Pressable,
 	StyleProp,
@@ -22,6 +23,7 @@ type Props = {
 	onPressed: (event: GestureResponderEvent) => void;
 	customColor?: ColorSettings;
 	size?: { width?: number; height?: number };
+	loading?: boolean;
 	extraStyle?: StyleProp<ViewStyle>;
 };
 
@@ -42,16 +44,18 @@ const PHButton = (props: Props) => {
 					height: props.size.height,
 				}
 			: {};
+	const isLoading = props.loading ?? false;
 
 	return (
 		<Pressable
 			style={({ pressed }) => [
 				styles.button,
-				pressed ? styles.buttonPressed : styles.button,
+				pressed || isLoading ? styles.buttonPressed : styles.button,
 				{
-					backgroundColor: pressed
-						? dynamicColors.pressed
-						: dynamicColors.normal,
+					backgroundColor:
+						pressed || isLoading
+							? dynamicColors.pressed
+							: dynamicColors.normal,
 					borderColor: dynamicColors.border,
 				},
 				adaptativeSize,
@@ -59,21 +63,33 @@ const PHButton = (props: Props) => {
 			]}
 			onPress={props.onPressed}
 		>
-			{({ pressed }) => (
-				<Text
-					style={[
-						styles.buttonText,
-						pressed ? styles.buttonTextPressed : styles.buttonText,
-						{
-							color: pressed
+			{({ pressed }) =>
+				isLoading ? (
+					<ActivityIndicator
+						color={
+							pressed
 								? dynamicColors.textPressed
-								: dynamicColors.textNormal,
-						},
-					]}
-				>
-					{props.text}
-				</Text>
-			)}
+								: dynamicColors.textNormal
+						}
+					/>
+				) : (
+					<Text
+						style={[
+							styles.buttonText,
+							pressed
+								? styles.buttonTextPressed
+								: styles.buttonText,
+							{
+								color: pressed
+									? dynamicColors.textPressed
+									: dynamicColors.textNormal,
+							},
+						]}
+					>
+						{props.text}
+					</Text>
+				)
+			}
 		</Pressable>
 	);
 };
@@ -96,6 +112,7 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 		borderColor: PHColors.border,
 		alignItems: "center",
+		justifyContent: "center",
 	},
 	buttonPressed: {
 		paddingHorizontal: 28,

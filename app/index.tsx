@@ -1,13 +1,34 @@
 import PHButton from "@/src/components/Buttons/PHButton";
 import PHIconButton from "@/src/components/Buttons/PHIconButton";
 import { PHColors } from "@/src/constants/PHColors";
+import { PHUserManagement } from "@/src/services/PHUserManagement";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { Image } from "expo-image";
-import { Stack } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
+	const router = useRouter();
+	const [loading, setLoading] = useState(false);
+
+	const handleGoogleSignIn = async () => {
+		setLoading(true);
+
+		const { error } = await PHUserManagement.loginWithGoogle();
+
+		if (error) {
+			if (error.message !== "Login cancelado") {
+				Alert.alert("Erro no Login", error.message);
+			}
+		} else {
+			router.replace("/pages/main");
+		}
+
+		setLoading(false);
+	};
+
 	return (
 		<View style={styles.container}>
 			<Stack.Screen options={{ headerShown: false }} />
@@ -25,28 +46,29 @@ export default function Index() {
 				<PHButton
 					size={{ width: 250 }}
 					text="Entrar"
-					onPressed={() => {}}
+					onPressed={() => router.navigate("/credentials/login")}
 					customColor={{
 						normal: PHColors.border,
 						pressed: PHColors.border,
 						textNormal: PHColors.background,
 						textPressed: PHColors.background,
+						border: PHColors.border,
 					}}
 				/>
 				<PHButton
 					size={{ width: 250 }}
 					text="Cadastrar"
-					onPressed={() => {}}
+					onPressed={() => router.navigate("/credentials/signup")}
 				/>
 			</View>
 			<View style={styles.otherContainer}>
-				<Text style={styles.subtitle}>Entrar usando:</Text>
+				<Text style={styles.subtitle}>Ou entrar usando:</Text>
 				<View style={styles.otherButtonContainer}>
 					<PHIconButton
 						icon={faGoogle as IconDefinition}
 						iconSize={20}
 						roundness={50}
-						onPressed={() => {}}
+						onPressed={handleGoogleSignIn}
 						style={{ width: 45 }}
 						customColor={{
 							normal: PHColors.googleBackground,
@@ -72,11 +94,10 @@ const styles = StyleSheet.create({
 	textContainer: {
 		justifyContent: "center",
 		alignItems: "center",
-		gap: 5,
+		marginBottom: 20,
 	},
 	buttonContainer: {
 		flexDirection: "column",
-		marginTop: 20,
 		marginBottom: 50,
 		gap: 10,
 	},
@@ -88,11 +109,13 @@ const styles = StyleSheet.create({
 	title: {
 		color: PHColors.text,
 		fontSize: 50,
+		textAlign: "center",
 		userSelect: "none",
 	},
 	subtitle: {
 		color: PHColors.placeholder,
 		fontSize: 16,
+		textAlign: "center",
 		userSelect: "none",
 	},
 	image: { width: 250, height: 200, marginBottom: 20 },
