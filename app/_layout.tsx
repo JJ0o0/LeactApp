@@ -54,6 +54,7 @@ export default function RootLayout() {
 				headerBackTitle: "",
 				headerTitle: "",
 				contentStyle: { backgroundColor: PHColors.background },
+				headerTitleAlign: "center",
 			}}
 		/>
 	);

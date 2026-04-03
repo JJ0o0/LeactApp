@@ -1,11 +1,12 @@
 export const PHColors = {
-    background: "#253237",
-    foreground: "#5C6B73",
-    border: "#C2DFE3",
-    placeholder: "#9DB4C0",
-    text: "#E0FBFC",
-    googleBackground: "#4285F4",
-    googleBorder: "#20437a"
+	background: "#253237",
+	foreground: "#312F2F",
+	border: "#C2DFE3",
+	placeholder: "#9DB4C0",
+	text: "#E0FBFC",
+	googleBackground: "#4285F4",
+	googleBorder: "#20437a",
+	starColor: "#FFD700",
 };
 
 /* 

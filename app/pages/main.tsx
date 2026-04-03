@@ -1,125 +1,90 @@
-import PHButton from "@/src/components/Buttons/PHButton";
+import PHMainCard from "@/src/components/Cards/PHMainCard";
 import { PHColors } from "@/src/constants/PHColors";
-import { PHUserManagement } from "@/src/services/PHUserManagement";
-import { supabase } from "@/src/utils/SupabaseConnection";
+import { PHContentService } from "@/src/services/PHContentService";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import {
 	ActivityIndicator,
-	Alert,
 	FlatList,
-	Image,
+	RefreshControl,
 	StyleSheet,
-	Text,
 	View,
 } from "react-native";
 
-interface UserProfile {
-	id: string;
-	nome: string;
-	foto_url: string;
-}
-
 export default function Main() {
-	const [perfil, setPerfil] = useState<UserProfile | null>(null);
-	const [usuarios, setUsuarios] = useState<UserProfile[]>([]);
+	const [analises, setAnalises] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [refreshing, setRefreshing] = useState(false);
+
+	const formatDate = (dataIso: string) => {
+		const data = new Date(dataIso);
+		return data.toLocaleDateString("pt-BR", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+		});
+	};
 
 	const loadData = async () => {
-		setLoading(true);
-		try {
-			const {
-				data: { user },
-			} = await supabase.auth.getUser();
-			if (user) {
-				const { data: myData } = await supabase
-					.from("Perfil")
-					.select("*")
-					.eq("id", user.id)
-					.single();
-				if (myData) setPerfil(myData);
-			}
+		const { data, error } = await PHContentService.fetchFeed();
 
-			const { data: allUsers, error } = await supabase
-				.from("Perfil")
-				.select("id, nome, foto_url")
-				.order("nome", { ascending: true });
-
-			if (error) throw error;
-			if (allUsers) setUsuarios(allUsers);
-		} catch (err: any) {
-			console.error("Erro ao carregar dados:", err.message);
-		} finally {
-			setLoading(false);
+		if (error) {
+			console.error("Erro no Banco de Dados:", error.message);
+			return;
 		}
+
+		if (data) setAnalises(data);
+		setLoading(false);
+		setRefreshing(false);
 	};
 
 	useEffect(() => {
 		loadData();
 	}, []);
 
-	const handleLogout = async () => {
-		const { error } = await PHUserManagement.logout();
-		if (error) Alert.alert("Erro ao sair: ", error.message);
+	const onRefresh = () => {
+		setRefreshing(true);
+		loadData();
 	};
 
-	const renderUserItem = ({ item }: { item: UserProfile }) => (
-		<View style={styles.userItem}>
-			<Image source={{ uri: item.foto_url }} style={styles.miniAvatar} />
-			<View>
-				<Text style={styles.userName}>{item.nome}</Text>
-				<Text style={styles.userStatus}>Online</Text>
+	if (loading) {
+		return (
+			<View style={styles.center}>
+				<ActivityIndicator size="large" color={PHColors.border} />
 			</View>
-		</View>
-	);
+		);
+	}
 
 	return (
 		<View style={styles.container}>
-			<Stack.Screen options={{ headerShown: false }} />
-
-			<View style={styles.header}>
-				{loading ? (
-					<ActivityIndicator color={PHColors.border} />
-				) : (
-					<>
-						<Image
-							source={{ uri: perfil?.foto_url }}
-							style={styles.avatar}
-						/>
-						<Text style={styles.title}>Olá, {perfil?.nome}!</Text>
-					</>
-				)}
-			</View>
-
-			<View style={styles.divider} />
-			<Text style={styles.sectionTitle}>Outros Usuários</Text>
+			<Stack.Screen options={{ headerTitle: "Feed Literário" }} />
 
 			<FlatList
-				data={usuarios}
+				data={analises}
 				keyExtractor={(item) => item.id}
-				renderItem={renderUserItem}
+				renderItem={({ item }) => (
+					<PHMainCard
+						userName={item.Perfil?.nome || "Usuário"}
+						userPhoto={item.Perfil?.foto_url}
+						bookTitle={item.Livros?.titulo || "Livro Desconhecido"}
+						content={item.conteudo}
+						note={item.nota}
+						date={formatDate(item.created_at)}
+						commentsCount={0}
+						onPress={() =>
+							console.log("Navegar para detalhes:", item.id)
+						}
+					/>
+				)}
 				contentContainerStyle={styles.listContent}
-				ListEmptyComponent={
-					<Text style={{ color: "#888" }}>
-						Nenhum outro usuário encontrado.
-					</Text>
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={onRefresh}
+						tintColor={PHColors.border}
+					/>
 				}
 			/>
-
-			<View style={styles.buttonContainer}>
-				<PHButton
-					text="Sair da Conta"
-					onPressed={handleLogout}
-					size={{ width: 300 }}
-					customColor={{
-						normal: PHColors.background,
-						pressed: PHColors.border,
-						textNormal: "#FF4444",
-						textPressed: PHColors.background,
-						border: "#FF4444",
-					}}
-				/>
-			</View>
 		</View>
 	);
 }
@@ -128,73 +93,13 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: PHColors.background,
-		paddingTop: 60,
+		paddingVertical: 80,
 	},
-	header: {
+	center: {
+		flex: 1,
+		justifyContent: "center",
 		alignItems: "center",
-		marginBottom: 20,
+		backgroundColor: PHColors.background,
 	},
-	avatar: {
-		width: 120,
-		height: 120,
-		borderRadius: 60,
-		borderWidth: 3,
-		borderColor: PHColors.border,
-		marginBottom: 10,
-	},
-	title: {
-		color: PHColors.text,
-		fontSize: 22,
-		fontWeight: "bold",
-	},
-	divider: {
-		height: 1,
-		backgroundColor: PHColors.border,
-		marginHorizontal: 20,
-		opacity: 0.3,
-	},
-	sectionTitle: {
-		color: PHColors.placeholder,
-		fontSize: 14,
-		textTransform: "uppercase",
-		marginLeft: 20,
-		marginTop: 20,
-		marginBottom: 10,
-		fontWeight: "bold",
-	},
-	listContent: {
-		paddingHorizontal: 20,
-		paddingBottom: 100,
-	},
-	userItem: {
-		flexDirection: "row",
-		alignItems: "center",
-		backgroundColor: "#1A1A1A",
-		padding: 12,
-		borderRadius: 12,
-		marginBottom: 10,
-		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.05)",
-	},
-	miniAvatar: {
-		width: 45,
-		height: 45,
-		borderRadius: 22.5,
-		marginRight: 15,
-	},
-	userName: {
-		color: PHColors.text,
-		fontSize: 16,
-		fontWeight: "600",
-	},
-	userStatus: {
-		color: "#4CAF50",
-		fontSize: 12,
-	},
-	buttonContainer: {
-		position: "absolute",
-		bottom: 30,
-		width: "100%",
-		alignItems: "center",
-	},
+	listContent: { padding: 15, paddingBottom: 100 },
 });
