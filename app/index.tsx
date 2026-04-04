@@ -1,32 +1,28 @@
 import PHButton from "@/src/components/Buttons/PHButton";
 import PHIconButton from "@/src/components/Buttons/PHIconButton";
 import { PHColors } from "@/src/constants/PHColors";
-import { PHUserManagement } from "@/src/services/PHUserManagement";
+import { PHContentHandler } from "@/src/services/PHContentHandler";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
 
-	const handleGoogleSignIn = async () => {
-		setLoading(true);
+	const onLoginPress = () => {
+		router.navigate("/(auth)/login");
+	};
 
-		const { error } = await PHUserManagement.loginWithGoogle();
+	const onSignupPress = () => {
+		router.navigate("/(auth)/signup");
+	};
 
-		if (error) {
-			if (error.message !== "Login cancelado") {
-				Alert.alert("Erro no Login", error.message);
-			}
-		} else {
-			router.replace("/pages/main");
-		}
-
-		setLoading(false);
+	const onGooglePress = () => {
+		PHContentHandler.handleGoogleSignin(router, setLoading);
 	};
 
 	return (
@@ -46,7 +42,7 @@ export default function Index() {
 				<PHButton
 					size={{ width: 250 }}
 					text="Entrar"
-					onPressed={() => router.navigate("/credentials/login")}
+					onPressed={onLoginPress}
 					customColor={{
 						normal: PHColors.border,
 						pressed: PHColors.border,
@@ -54,11 +50,13 @@ export default function Index() {
 						textPressed: PHColors.background,
 						border: PHColors.border,
 					}}
+					loading={loading}
 				/>
 				<PHButton
 					size={{ width: 250 }}
 					text="Cadastrar"
-					onPressed={() => router.navigate("/credentials/signup")}
+					onPressed={onSignupPress}
+					loading={loading}
 				/>
 			</View>
 			<View style={styles.otherContainer}>
@@ -68,7 +66,7 @@ export default function Index() {
 						icon={faGoogle as IconDefinition}
 						iconSize={20}
 						roundness={50}
-						onPressed={handleGoogleSignIn}
+						onPressed={onGooglePress}
 						style={{ width: 45 }}
 						customColor={{
 							normal: PHColors.googleBackground,

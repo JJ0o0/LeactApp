@@ -14,13 +14,13 @@ export default function RootLayout() {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange((event, session) => {
 			const currentPath = segments.join("/");
-			const inAuthGroup = segments.includes("credentials");
+			const inAuthGroup = segments.includes("(auth)");
 			const isRoot = currentPath === "";
 
 			if (!session && !inAuthGroup && !isRoot) {
 				router.replace("/");
 			} else if (session && (inAuthGroup || isRoot)) {
-				router.replace("/pages/main");
+				router.replace("/(tabs)");
 			}
 
 			setIsReady(true);

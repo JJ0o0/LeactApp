@@ -1,11 +1,10 @@
 import PHButton from "@/src/components/Buttons/PHButton";
 import PHTextBox from "@/src/components/PHTextBox";
 import { PHColors } from "@/src/constants/PHColors";
-import { PHUserManagement } from "@/src/services/PHUserManagement";
+import { PHContentHandler } from "@/src/services/PHContentHandler";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-	Alert,
 	KeyboardAvoidingView,
 	Platform,
 	ScrollView,
@@ -20,39 +19,13 @@ export default function ForgotPassword() {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
-	const verifyFields = () => {
-		if (password.length < 8) {
-			Alert.alert("Erro", "A senha deve ter pelo menos 8 caracteres.");
-
-			return false;
-		}
-
-		if (password !== passwordConfirmation) {
-			Alert.alert("Erro", "As senhas não coincidem.");
-
-			return false;
-		}
-
-		return true;
-	};
-
-	const handleUpdate = async () => {
-		if (!verifyFields()) {
-			return;
-		}
-
-		setLoading(true);
-
-		const { error } = await PHUserManagement.updatePassword(password);
-
-		if (error) {
-			Alert.alert("Erro ao atualizar: ", error.message);
-		} else {
-			Alert.alert("Sucesso", "Sua senha foi alterada com sucesso!", [
-				{ text: "OK", onPress: () => router.replace("/") },
-			]);
-		}
-		setLoading(false);
+	const onResetPasswordPressed = () => {
+		PHContentHandler.handleResetPassword(
+			password,
+			passwordConfirmation,
+			router,
+			setLoading,
+		);
 	};
 
 	return (
@@ -94,7 +67,7 @@ export default function ForgotPassword() {
 				<View style={styles.buttonContainer}>
 					<PHButton
 						text="Alterar"
-						onPressed={handleUpdate}
+						onPressed={onResetPasswordPressed}
 						loading={loading}
 						size={{ width: 250 }}
 						customColor={{

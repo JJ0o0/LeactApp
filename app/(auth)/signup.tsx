@@ -1,12 +1,10 @@
 import PHButton from "@/src/components/Buttons/PHButton";
 import PHTextBox from "@/src/components/PHTextBox";
 import { PHColors } from "@/src/constants/PHColors";
-import { PHUserManagement } from "@/src/services/PHUserManagement";
+import { PHContentHandler } from "@/src/services/PHContentHandler";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-	Alert,
 	Keyboard,
 	KeyboardAvoidingView,
 	Platform,
@@ -16,38 +14,14 @@ import {
 	View,
 } from "react-native";
 
-export default function Login() {
-	const router = useRouter();
-
+export default function Signup() {
+	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const verifyFields = () => {
-		if (!email.trim() || password.length < 8) {
-			Alert.alert("Erro", "Preencha os dados corretamente.");
-			return false;
-		}
-
-		return true;
-	};
-
-	const handleLogin = async () => {
-		if (!verifyFields()) {
-			return;
-		}
-
-		setLoading(true);
-
-		const { data, error } = await PHUserManagement.login(email, password);
-
-		if (error) {
-			Alert.alert("Erro ao entrar na conta: " + error);
-		} else {
-			router.replace("/pages/main");
-		}
-
-		setLoading(false);
+	const onSignupPressed = () => {
+		PHContentHandler.handleSignup(name, email, password, setLoading);
 	};
 
 	return (
@@ -56,16 +30,27 @@ export default function Login() {
 			behavior={Platform.OS === "ios" ? "padding" : "padding"}
 		>
 			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-				<View style={[styles.container, { width: "100%", flex: 1 }]}>
+				<View style={styles.container}>
 					<Image
 						source={require("@/assets/user/signupLogo.png")}
 						style={styles.image}
 						contentFit="fill"
 					/>
 					<View style={styles.textContainer}>
-						<Text style={styles.title}>Entrar</Text>
+						<Text style={styles.title}>Criar Conta</Text>
 					</View>
 					<View style={styles.inputContainer}>
+						<PHTextBox
+							value={name}
+							placeholder="Nome Completo"
+							placeholderColor={PHColors.placeholder}
+							onChangeText={setName}
+							autoCapitalize="words"
+							autoCorrect={true}
+							textContentType="name"
+							autoComplete="name"
+							textBoxSettings={{ width: 350, height: 50 }}
+						/>
 						<PHTextBox
 							value={email}
 							placeholder="Email"
@@ -86,20 +71,12 @@ export default function Login() {
 							autoComplete="password"
 							textBoxSettings={{ width: 350, height: 50 }}
 						/>
-						<Text
-							style={styles.forgotPassword}
-							onPress={() =>
-								router.push("/credentials/forgot-password")
-							}
-						>
-							Esqueceu sua senha?
-						</Text>
 					</View>
 					<View style={styles.buttonContainer}>
 						<PHButton
 							size={{ width: 250 }}
-							text="Entrar"
-							onPressed={handleLogin}
+							text="Cadastrar"
+							onPressed={onSignupPressed}
 							customColor={{
 								normal: PHColors.border,
 								pressed: PHColors.border,
@@ -153,10 +130,4 @@ const styles = StyleSheet.create({
 		userSelect: "none",
 	},
 	image: { width: 150, height: 250 },
-	forgotPassword: {
-		color: PHColors.placeholder,
-		textAlign: "left",
-		width: 350,
-		paddingLeft: 5,
-	},
 });

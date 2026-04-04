@@ -1,11 +1,10 @@
 import PHButton from "@/src/components/Buttons/PHButton";
 import PHTextBox from "@/src/components/PHTextBox";
 import { PHColors } from "@/src/constants/PHColors";
-import { PHUserManagement } from "@/src/services/PHUserManagement";
+import { PHContentHandler } from "@/src/services/PHContentHandler";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-	Alert,
 	KeyboardAvoidingView,
 	Platform,
 	ScrollView,
@@ -19,34 +18,12 @@ export default function ForgotPassword() {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
-	const verifyFields = () => {
-		if (!email.trim() || !email.includes("@")) {
-			Alert.alert("Erro", "Por favor, digite um e-mail válido.");
-			return false;
-		}
-
-		return true;
-	};
-
-	const handleReset = async () => {
-		if (!verifyFields()) {
-			return;
-		}
-
-		setLoading(true);
-		const { error } = await PHUserManagement.resetPassword(email);
-
-		if (error) {
-			Alert.alert("Erro", error.message);
-		} else {
-			Alert.alert(
-				"Sucesso",
-				"Link de recuperação enviado para o seu e-mail!",
-			);
-
-			router.back();
-		}
-		setLoading(false);
+	const onVerificationResetPressed = () => {
+		PHContentHandler.handleResetPasswordVerificationEmail(
+			email,
+			router,
+			setLoading,
+		);
 	};
 
 	return (
@@ -77,7 +54,7 @@ export default function ForgotPassword() {
 				<View style={styles.buttonContainer}>
 					<PHButton
 						text="Enviar Link"
-						onPressed={handleReset}
+						onPressed={onVerificationResetPressed}
 						loading={loading}
 						size={{ width: 250 }}
 						customColor={{

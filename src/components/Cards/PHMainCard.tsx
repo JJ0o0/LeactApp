@@ -30,8 +30,8 @@ const PHMainCard = ({
 			style={({ pressed }) => [
 				styles.card,
 				{
-					opacity: pressed ? 0.7 : 1,
-					transform: [{ scale: pressed ? 0.98 : 1 }],
+					opacity: pressed ? 0.9 : 1,
+					transform: [{ scale: pressed ? 0.99 : 1 }],
 				},
 			]}
 			onPress={onPress}
@@ -88,6 +88,11 @@ const styles = StyleSheet.create({
 		backgroundColor: PHColors.foreground,
 		padding: 15,
 		marginBottom: 15,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 4,
+		elevation: 5,
 	},
 	header: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
 	headerText: { marginLeft: 12, flex: 1 },

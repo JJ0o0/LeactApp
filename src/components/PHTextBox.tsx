@@ -1,4 +1,5 @@
 import {
+	DimensionValue,
 	StyleProp,
 	StyleSheet,
 	TextInput,
@@ -8,8 +9,8 @@ import {
 import { PHColors } from "../constants/PHColors";
 
 type TextBoxSettings = {
-	width?: number;
-	height?: number;
+	width?: DimensionValue;
+	height?: DimensionValue;
 	fontSize?: number;
 };
 
@@ -33,25 +34,19 @@ type Props = {
 const PHTextBox = (props: Props) => {
 	const isMultiline = props.multiline !== undefined ? props.multiline : false;
 	const isSecret = props.secret !== undefined ? props.secret : false;
-	const limit =
-		props.limitTextQuantity !== undefined
-			? props.limitTextQuantity
-			: undefined;
-	const defaultTextBoxSettings =
-		props.textBoxSettings !== undefined
-			? {
-					width: props.textBoxSettings.width,
-					height: props.textBoxSettings.height,
-					fontSize: props.textBoxSettings.fontSize,
-				}
-			: { width: 250, height: 50, fontSize: 16 };
+	const limit = props.limitTextQuantity;
+	const defaultTextBoxSettings: TextStyle = {
+		width: props.textBoxSettings?.width ?? 250,
+		height: props.textBoxSettings?.height ?? 50,
+		fontSize: props.textBoxSettings?.fontSize ?? 16,
+	};
 
 	return (
 		<TextInput
 			style={[
 				styles.inputStyle,
-				props.extraStyle,
 				defaultTextBoxSettings,
+				props.extraStyle,
 			]}
 			value={props.value}
 			placeholder={props.placeholder}

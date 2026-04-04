@@ -1,7 +1,7 @@
 export const PHColors = {
 	background: "#253237",
-	foreground: "#312F2F",
-	border: "#C2DFE3",
+	foreground: "#2C3E46",
+	border: "#5C6B73",
 	placeholder: "#9DB4C0",
 	text: "#E0FBFC",
 	googleBackground: "#4285F4",
