@@ -5,6 +5,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Props {
+	id: string;
 	userName: string;
 	userPhoto: string;
 	bookTitle: string;
@@ -12,10 +13,11 @@ interface Props {
 	note: number;
 	date: string;
 	commentsCount?: number;
-	onPress?: () => void;
+	onPress?: (id: string) => void;
 }
 
 const PHMainCard = ({
+	id,
 	userName,
 	userPhoto,
 	bookTitle,
@@ -34,7 +36,7 @@ const PHMainCard = ({
 					transform: [{ scale: pressed ? 0.99 : 1 }],
 				},
 			]}
-			onPress={onPress}
+			onPress={() => onPress?.(id)}
 		>
 			<View style={styles.header}>
 				<Image

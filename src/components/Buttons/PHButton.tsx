@@ -1,6 +1,7 @@
 import React from "react";
 import {
 	ActivityIndicator,
+	DimensionValue,
 	GestureResponderEvent,
 	Pressable,
 	StyleProp,
@@ -22,7 +23,7 @@ type Props = {
 	text: string;
 	onPressed: (event: GestureResponderEvent) => void;
 	customColor?: ColorSettings;
-	size?: { width?: number; height?: number };
+	size?: { width?: DimensionValue; height?: DimensionValue };
 	loading?: boolean;
 	extraStyle?: StyleProp<ViewStyle>;
 };

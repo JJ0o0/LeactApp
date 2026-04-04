@@ -53,12 +53,64 @@ export const PHUtils = {
 
 		return true;
 	},
-	formatDate(dataIso: string) {
+	verifyCreateAnaliseFields(livroId: string, nota: number, conteudo: string) {
+		if (!livroId) {
+			Alert.alert("Erro", "Você precisa selecionar um livro.");
+			return false;
+		}
+		if (nota === 0) {
+			Alert.alert("Erro", "Dê uma nota para a sua leitura.");
+			return false;
+		}
+
+		if (conteudo.trim().length < 10) {
+			Alert.alert("Erro", "Escreva um pouco mais na sua análise.");
+			return false;
+		}
+
+		return true;
+	},
+	verifyCreateBookFields(titulo: string, autor: string) {
+		if (!titulo.trim() || !autor.trim()) {
+			Alert.alert("Erro", "Título e Autor são obrigatórios.");
+			return false;
+		}
+
+		return true;
+	},
+	formatRelativeDate(dataIso: string) {
 		const data = new Date(dataIso);
-		return data.toLocaleDateString("pt-BR", {
-			day: "2-digit",
-			month: "2-digit",
-			year: "numeric",
-		});
+		const agora = new Date();
+
+		const hoje = new Date(
+			agora.getFullYear(),
+			agora.getMonth(),
+			agora.getDate(),
+		);
+		const dataComentario = new Date(
+			data.getFullYear(),
+			data.getMonth(),
+			data.getDate(),
+		);
+
+		const diffTempo = hoje.getTime() - dataComentario.getTime();
+		const diffDias = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
+
+		if (diffDias === 0) {
+			return data.toLocaleTimeString("pt-BR", {
+				hour: "2-digit",
+				minute: "2-digit",
+			});
+		} else if (diffDias === 1) {
+			return "Ontem";
+		} else if (diffDias < 7) {
+			return `há ${diffDias} dias`;
+		} else {
+			return data.toLocaleDateString("pt-BR", {
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric",
+			});
+		}
 	},
 };

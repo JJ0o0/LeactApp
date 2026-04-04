@@ -30,6 +30,7 @@ export default function TabLayout() {
 				headerTitleContainerStyle: {
 					paddingTop: 10,
 				},
+				headerLeft: () => null,
 			}}
 		>
 			<Tabs.Screen
@@ -38,6 +39,20 @@ export default function TabLayout() {
 					title: "Feed",
 					tabBarIcon: ({ color }) => (
 						<FontAwesome name="home" size={24} color={color} />
+					),
+				}}
+			/>
+
+			<Tabs.Screen
+				name="user-analises"
+				options={{
+					title: "Suas Análises",
+					tabBarIcon: ({ color }) => (
+						<FontAwesome
+							name="user-circle"
+							size={24}
+							color={color}
+						/>
 					),
 				}}
 			/>

@@ -1,10 +1,14 @@
+import PHIconButton from "@/src/components/Buttons/PHIconButton";
 import PHMainCard from "@/src/components/Cards/PHMainCard";
 import PHTextBox from "@/src/components/PHTextBox";
 import { PHColors } from "@/src/constants/PHColors";
 import { PHContentHandler } from "@/src/services/PHContentHandler";
 import { PHUtils } from "@/src/utils/PHUtils";
 import { FontAwesome } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
@@ -15,6 +19,7 @@ import {
 } from "react-native";
 
 export default function Main() {
+	const router = useRouter();
 	const [analises, setAnalises] = useState<any[]>([]);
 	const [search, setSearch] = useState("");
 	const [loading, setLoading] = useState(true);
@@ -32,6 +37,13 @@ export default function Main() {
 		PHContentHandler.handleFeedDataSearch(search, setAnalises);
 	};
 
+	const onCardPress = useCallback(
+		(id: string) => {
+			router.push(`/analise/${id}`);
+		},
+		[router],
+	);
+
 	const onRefresh = () => {
 		setRefreshing(true);
 
@@ -41,6 +53,12 @@ export default function Main() {
 	useEffect(() => {
 		loadData();
 	}, []);
+
+	useFocusEffect(
+		useCallback(() => {
+			loadData();
+		}, []),
+	);
 
 	useEffect(() => {
 		if (search.trim() === "") {
@@ -79,20 +97,25 @@ export default function Main() {
 			<FlatList
 				data={analises}
 				keyExtractor={(item) => item.id}
-				renderItem={({ item }) => (
-					<PHMainCard
-						userName={item.Perfil?.nome || "Usuário"}
-						userPhoto={item.Perfil?.foto_url}
-						bookTitle={item.Livros?.titulo || "Livro Desconhecido"}
-						content={item.conteudo}
-						note={item.nota}
-						date={PHUtils.formatDate(item.created_at)}
-						commentsCount={0}
-						onPress={() =>
-							console.log("Navegar para detalhes:", item.id)
-						}
-					/>
-				)}
+				renderItem={({ item }) => {
+					const totalComentarios = item.Comentarios?.[0]?.count || 0;
+
+					return (
+						<PHMainCard
+							id={item.id}
+							userName={item.Perfil?.nome || "Usuário"}
+							userPhoto={item.Perfil?.foto_url}
+							bookTitle={
+								item.Livros?.titulo || "Livro Desconhecido"
+							}
+							content={item.conteudo}
+							note={item.nota}
+							date={PHUtils.formatRelativeDate(item.created_at)}
+							commentsCount={totalComentarios}
+							onPress={onCardPress}
+						/>
+					);
+				}}
 				contentContainerStyle={styles.listContent}
 				style={styles.list}
 				refreshControl={
@@ -119,6 +142,24 @@ export default function Main() {
 						</Text>
 					</View>
 				}
+			/>
+			<PHIconButton
+				icon={faPlus as IconDefinition}
+				floating={true}
+				onPressed={() => router.push("/analise/create-analise")}
+				iconSize={30}
+				roundness={30}
+				style={{
+					right: 20,
+					bottom: 30,
+				}}
+				customColor={{
+					normal: PHColors.border,
+					pressed: PHColors.background,
+					iconNormal: PHColors.background,
+					iconPressed: PHColors.border,
+					border: PHColors.border,
+				}}
 			/>
 		</View>
 	);
@@ -169,5 +210,22 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		marginTop: 8,
 		lineHeight: 20,
+	},
+	fab: {
+		position: "absolute",
+		right: 25,
+		bottom: 25,
+		backgroundColor: PHColors.border,
+		width: 60,
+		height: 60,
+		borderRadius: 30,
+		justifyContent: "center",
+		alignItems: "center",
+		zIndex: 9999,
+		elevation: 10,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 4.65,
 	},
 });
