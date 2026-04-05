@@ -2,13 +2,19 @@
   "expo": {
     "name": "Leact",
     "slug": "LeactApp",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "leactapp",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash-icon.png", 
+      "resizeMode": "contain",
+      "backgroundColor": "#253237"
+    },
     "androidNavigationBar": {
-      "visible": "sticky-immersive"
+      "visible": "immersive",
+      "barStyle": "dark-content"
     },
     "ios": {
       "supportsTablet": true
@@ -18,9 +24,8 @@
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "backgroundColor": "#253237",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "monochromeImage": "./assets/images/icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.phosphorus.leactapp"
@@ -52,6 +57,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "22a2d2b3-bd20-4dc6-b63e-16c291fcf85e"
+      }
     }
   }
 }

@@ -7,6 +7,7 @@ import {
 	faRightFromBracket,
 	faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
+import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -33,7 +34,6 @@ export default function SettingsScreen() {
 			<ScrollView contentContainerStyle={styles.scrollContent}>
 				<Text style={styles.sectionTitle}>Conta</Text>
 
-				{/* Informação do Provedor */}
 				<View style={styles.infoCard}>
 					<View style={styles.infoRow}>
 						<Text style={styles.infoLabel}>Email</Text>
@@ -66,7 +66,6 @@ export default function SettingsScreen() {
 
 				<Text style={styles.sectionTitle}>Ações</Text>
 
-				{/* Botão Sair */}
 				<View style={styles.actionRow}>
 					<View style={styles.actionInfo}>
 						<Text style={styles.actionTitle}>Sair da Conta</Text>
@@ -121,7 +120,16 @@ export default function SettingsScreen() {
 				</View>
 
 				<View style={styles.footerInfo}>
-					<Text style={styles.versionText}>Versão 1.0.0</Text>
+					<Text style={styles.versionText}>
+						Todos direitos reservados a Phosphorus Team
+					</Text>
+					<Image
+						source={require("@/assets/user/phlogo.png")}
+						tintColor={PHColors.placeholder}
+						style={{ width: 120, height: 120 }}
+					/>
+					<Text style={styles.versionText}>Versão 1.0.2</Text>
+					<Text style={styles.versionText}>Build Sugarcane</Text>
 				</View>
 			</ScrollView>
 		</View>

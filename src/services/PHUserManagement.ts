@@ -1,3 +1,4 @@
+import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { supabase } from "../utils/SupabaseConnection";
 
@@ -67,10 +68,11 @@ export const PHUserManagement = {
         Envia um email para resetar a senha do usuário.
     */
 	async resetPassword(email: string) {
+		const redirectTo = Linking.createURL("reset-password");
 		const { data, error } = await supabase.auth.resetPasswordForEmail(
 			email,
 			{
-				redirectTo: "leactapp://reset-password",
+				redirectTo: redirectTo,
 			},
 		);
 
@@ -92,7 +94,7 @@ export const PHUserManagement = {
 		Realiza o login/cadastro de um usuário usando o Google.
 	*/
 	async loginWithGoogle() {
-		const redirectTo = "exp://192.168.1.6:8081/--/auth-callback";
+		const redirectTo = Linking.createURL("auth-callback");
 
 		console.log("URL DE VOLTA:", redirectTo);
 
