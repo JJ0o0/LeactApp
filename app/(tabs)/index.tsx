@@ -7,7 +7,7 @@ import { PHUtils } from "@/src/utils/PHUtils";
 import { FontAwesome } from "@expo/vector-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
 	ActivityIndicator,
@@ -85,12 +85,15 @@ export default function Main() {
 
 	return (
 		<View style={styles.container}>
+			<Stack.Screen
+				options={{ headerShown: true, headerBackVisible: false }}
+			/>
 			<View style={styles.searchWrapper}>
 				<PHTextBox
 					value={search}
 					placeholder="Pesquisar..."
 					placeholderColor={PHColors.placeholder}
-					textBoxSettings={{ width: "92%" }}
+					textBoxSettings={{ width: "96%" }}
 					onChangeText={setSearch}
 				/>
 			</View>
@@ -183,6 +186,7 @@ const styles = StyleSheet.create({
 	searchWrapper: {
 		width: "100%",
 		alignItems: "center",
+		marginTop: 15,
 	},
 	center: {
 		flex: 1,

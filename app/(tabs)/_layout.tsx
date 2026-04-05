@@ -12,7 +12,7 @@ export default function TabLayout() {
 				tabBarStyle: {
 					backgroundColor: PHColors.background,
 					borderTopColor: "rgba(255,255,255,0.1)",
-					height: 65,
+					height: 60,
 					paddingBottom: 10,
 				},
 				headerStyle: {
@@ -25,7 +25,7 @@ export default function TabLayout() {
 				headerTintColor: PHColors.text,
 				headerTitleStyle: {
 					fontSize: 20,
-					marginTop: 20,
+					marginTop: 0,
 				},
 				headerTitleContainerStyle: {
 					paddingTop: 10,
@@ -53,6 +53,16 @@ export default function TabLayout() {
 							size={24}
 							color={color}
 						/>
+					),
+				}}
+			/>
+
+			<Tabs.Screen
+				name="books"
+				options={{
+					title: "Livros",
+					tabBarIcon: ({ color }) => (
+						<FontAwesome name="book" size={24} color={color} />
 					),
 				}}
 			/>

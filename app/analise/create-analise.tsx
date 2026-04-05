@@ -91,7 +91,7 @@ export default function CreateAnalise() {
 						isEditing && { opacity: 0.6 },
 					]}
 					onPress={() =>
-						!isEditing && router.push("/analise/select-book")
+						!isEditing && router.push("/book/select-book")
 					}
 					disabled={!!isEditing}
 				>
@@ -101,7 +101,11 @@ export default function CreateAnalise() {
 							size={18}
 							color={PHColors.border}
 						/>
-						<Text style={styles.bookText}>
+						<Text
+							style={styles.bookText}
+							numberOfLines={1}
+							ellipsizeMode="tail"
+						>
 							{tituloLivro || "Selecionar livro..."}
 						</Text>
 					</View>
@@ -192,8 +196,20 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: "rgba(255,255,255,0.1)",
 	},
-	selectBookContent: { flexDirection: "row", alignItems: "center", gap: 12 },
-	bookText: { color: PHColors.border, fontSize: 16, fontWeight: "500" },
+	selectBookContent: {
+		flex: 1,
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 12,
+	},
+	bookText: {
+		flex: 1,
+		marginRight: 10,
+		color: PHColors.border,
+		fontSize: 16,
+		fontWeight: "500",
+		textOverflow: "ellipsis",
+	},
 	starsRow: { flexDirection: "row", gap: 15, marginBottom: 35 },
 	inputExtra: { textAlignVertical: "top", paddingTop: 15, marginBottom: 30 },
 	buttonWrapper: { marginTop: 10, paddingBottom: 40 },

@@ -16,6 +16,9 @@ interface Props {
 	onPress?: (id: string) => void;
 }
 
+const DEFAULT_USER_PHOTO =
+	"https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+
 const PHMainCard = ({
 	id,
 	userName,
@@ -27,6 +30,9 @@ const PHMainCard = ({
 	commentsCount = 0,
 	onPress,
 }: Props) => {
+	const validPhoto =
+		userPhoto && userPhoto.trim() !== "" ? userPhoto : DEFAULT_USER_PHOTO;
+
 	return (
 		<Pressable
 			style={({ pressed }) => [
@@ -41,9 +47,10 @@ const PHMainCard = ({
 			<View style={styles.header}>
 				<Image
 					style={styles.userPhoto}
-					source={{ uri: userPhoto }}
+					source={{ uri: validPhoto }}
 					contentFit="cover"
 					transition={500}
+					cachePolicy="disk"
 				/>
 				<View style={styles.headerText}>
 					<Text style={styles.userName}>{userName}</Text>
@@ -60,7 +67,9 @@ const PHMainCard = ({
 				</View>
 			</View>
 			<View style={styles.body}>
-				<Text style={styles.bookTitle}>{bookTitle}</Text>
+				<Text style={styles.bookTitle} numberOfLines={2}>
+					{bookTitle}
+				</Text>
 				<Text style={styles.criticaPrevia} numberOfLines={3}>
 					{content}
 				</Text>

@@ -3,12 +3,13 @@ import { PHColors } from "@/src/constants/PHColors";
 import { PHContentHandler } from "@/src/services/PHContentHandler";
 import { PHUtils } from "@/src/utils/PHUtils";
 import { FontAwesome } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
 	FlatList,
+	Platform,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -27,6 +28,11 @@ export default function UserAnalises() {
 	);
 
 	const handleDelete = (id: string) => {
+		if (Platform.OS === "web") {
+			PHContentHandler.handleDeleteUserAnalise(id, setMyAnalises);
+			return;
+		}
+
 		Alert.alert("Excluir Análise", "Deseja mesmo apagar sua publicação?", [
 			{ text: "Cancelar", style: "cancel" },
 			{
@@ -40,6 +46,9 @@ export default function UserAnalises() {
 
 	return (
 		<View style={styles.container}>
+			<Stack.Screen
+				options={{ headerShown: true, headerBackVisible: false }}
+			/>
 			{loading ? (
 				<View style={styles.center}>
 					<ActivityIndicator color={PHColors.border} size="large" />
@@ -149,6 +158,7 @@ const styles = StyleSheet.create({
 		marginLeft: 5,
 	},
 	listPadding: {
+		marginTop: 15,
 		paddingHorizontal: 20,
 		paddingBottom: 40,
 	},

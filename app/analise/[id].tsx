@@ -66,6 +66,15 @@ export default function AnaliseInfo() {
 	};
 
 	const onDeletePressed = (commentId: string) => {
+		if (Platform.OS === "web") {
+			PHContentHandler.handleDeleteComment(
+				commentId,
+				id as string,
+				setAnalise,
+			);
+			return;
+		}
+
 		Alert.alert("Apagar Comentário", "Tem certeza que deseja remover?", [
 			{ text: "Cancelar", style: "cancel" },
 			{
@@ -99,8 +108,15 @@ export default function AnaliseInfo() {
 		);
 	}
 
-	const titulo =
-		analise?.Livros?.titulo || analise?.titulo || "Livro sem título";
+	const dadosLivro = Array.isArray(analise?.Livros)
+		? analise.Livros[0]
+		: analise?.Livros;
+
+	const titulo = dadosLivro?.titulo || analise?.titulo || "Livro sem título";
+	const autorLivro =
+		dadosLivro?.autor || analise?.autor || "Autor Desconhecido";
+	const fotoLivro = dadosLivro?.capa_url || analise?.capa_url || "";
+
 	const nota = analise?.nota || 0;
 	const nomeAutor = analise?.Perfil?.nome || "Usuário Desconhecido";
 	const fotoAutor = analise?.Perfil?.foto_url;
@@ -118,7 +134,13 @@ export default function AnaliseInfo() {
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={true}
 			>
+				<Image
+					source={{ uri: fotoLivro }}
+					contentFit="fill"
+					style={styles.bookCover}
+				/>
 				<Text style={styles.title}>{titulo}</Text>
+				<Text style={styles.bookAuthorName}>{autorLivro}</Text>
 
 				<View style={styles.ratingContainer}>
 					<FontAwesome
@@ -256,6 +278,20 @@ const styles = StyleSheet.create({
 	},
 	authorTextInfo: { marginLeft: 15, justifyContent: "center" },
 	authorName: { color: PHColors.text, fontSize: 16, fontWeight: "bold" },
+	bookAuthorName: {
+		color: PHColors.placeholder,
+		fontSize: 16,
+		marginBottom: 10,
+	},
+	bookCover: {
+		width: "60%",
+		height: 300,
+		alignSelf: "center",
+		marginBottom: 20,
+		borderWidth: 6,
+		borderColor: PHColors.border,
+		borderRadius: 4,
+	},
 	dateText: { color: PHColors.placeholder, fontSize: 13, marginTop: 2 },
 	contentContainer: {
 		backgroundColor: "rgba(255,255,255,0.03)",

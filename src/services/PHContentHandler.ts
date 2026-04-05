@@ -1,5 +1,5 @@
 import { Router } from "expo-router";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import { PHUtils } from "../utils/PHUtils";
 import { PHContentService } from "./PHContentService";
 import { PHUserManagement } from "./PHUserManagement";
@@ -21,7 +21,11 @@ export const PHContentHandler = {
 		const { data, error } = await PHUserManagement.login(email, password);
 
 		if (error) {
-			Alert.alert("Erro ao entrar na conta: " + error);
+			if (Platform.OS === "web") {
+				window.alert("Erro ao entrar na conta: " + error);
+			} else {
+				Alert.alert("Erro ao entrar na conta: " + error);
+			}
 		} else {
 			router.replace("/(tabs)");
 		}
@@ -47,19 +51,33 @@ export const PHContentHandler = {
 		);
 
 		if (!error && data?.user?.identities?.length === 0) {
-			Alert.alert(
-				"Aviso",
-				"Este e-mail já está sendo usado ou aguarda confirmação.",
-			);
+			if (Platform.OS === "web") {
+				window.alert(
+					"Aviso, este e-mail já está sendo usado ou aguarda confirmação.",
+				);
+			} else {
+				Alert.alert(
+					"Aviso",
+					"Este e-mail já está sendo usado ou aguarda confirmação.",
+				);
+			}
 
 			setLoading(false);
 			return;
 		}
 
 		if (error) {
-			Alert.alert("Erro ao cadastrar: " + error);
+			if (Platform.OS === "web") {
+				window.alert("Erro ao cadastrar: " + error);
+			} else {
+				Alert.alert("Erro ao cadastrar: " + error);
+			}
 		} else {
-			Alert.alert("Conta criada! Verifique seu email.");
+			if (Platform.OS === "web") {
+				window.alert("Conta criada! Verifique seu email.");
+			} else {
+				Alert.alert("Conta criada! Verifique seu email.");
+			}
 		}
 
 		setLoading(false);
@@ -74,7 +92,11 @@ export const PHContentHandler = {
 
 		if (error) {
 			if (error.message !== "Login cancelado") {
-				Alert.alert("Erro no Login: ", error.message);
+				if (Platform.OS === "web") {
+					window.alert("Erro no Login: " + error.message);
+				} else {
+					Alert.alert("Erro no Login: ", error.message);
+				}
 			}
 		} else {
 			router.replace("/(tabs)");
@@ -95,7 +117,11 @@ export const PHContentHandler = {
 		const { error } = await PHUserManagement.resetPassword(email);
 
 		if (error) {
-			Alert.alert("Erro", error.message);
+			if (Platform.OS === "web") {
+				window.alert("Erro: " + error.message);
+			} else {
+				Alert.alert("Erro", error.message);
+			}
 		} else {
 			Alert.alert(
 				"Sucesso",
@@ -124,15 +150,24 @@ export const PHContentHandler = {
 		const { error } = await PHUserManagement.updatePassword(password);
 
 		if (error) {
-			Alert.alert("Erro ao atualizar: ", error.message);
+			if (Platform.OS === "web") {
+				window.alert("Erro ao atualizar: " + error.message);
+			} else {
+				Alert.alert("Erro ao atualizar: ", error.message);
+			}
 		} else {
 			const onSuccessPressed = () => {
 				router.replace("/");
 			};
 
-			Alert.alert("Sucesso", "Sua senha foi alterada com sucesso!", [
-				{ text: "OK", onPress: onSuccessPressed },
-			]);
+			if (Platform.OS === "web") {
+				window.alert("Sucesso, sua análise foi publicada.");
+				onSuccessPressed();
+			} else {
+				Alert.alert("Sucesso", "Sua senha foi alterada com sucesso!", [
+					{ text: "OK", onPress: onSuccessPressed },
+				]);
+			}
 		}
 
 		setLoading(false);
@@ -189,10 +224,19 @@ export const PHContentHandler = {
 			);
 			if (error) throw error;
 
-			Alert.alert("Sucesso!", "Sua análise foi publicada.");
+			if (Platform.OS === "web") {
+				window.alert("Sucesso, sua análise foi publicada.");
+			} else {
+				Alert.alert("Sucesso!", "Sua análise foi publicada.");
+			}
+
 			router.replace("/(tabs)");
 		} catch (e: any) {
-			Alert.alert("Erro", e.message);
+			if (Platform.OS === "web") {
+				window.alert("Erro: " + e.message);
+			} else {
+				Alert.alert("Erro", e.message);
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -213,9 +257,17 @@ export const PHContentHandler = {
 
 		setLoading(false);
 		if (error) {
-			Alert.alert("Erro", "Não foi possível atualizar a análise.");
+			if (Platform.OS === "web") {
+				window.alert("Erro, Não foi possível atualizar a análise.");
+			} else {
+				Alert.alert("Erro", "Não foi possível atualizar a análise.");
+			}
 		} else {
-			Alert.alert("Sucesso", "Análise atualizada!");
+			if (Platform.OS === "web") {
+				window.alert("Sucesso, análise atualizada!");
+			} else {
+				Alert.alert("Sucesso", "Análise atualizada!");
+			}
 
 			router.back();
 		}
@@ -292,7 +344,8 @@ export const PHContentHandler = {
 
 			if (error) {
 				console.error("Erro ao comentar:", error);
-				alert("Não foi possível enviar o comentário.");
+
+				window.alert("Não foi possível enviar o comentário.");
 			} else {
 				setNewComment("");
 				await this.handleAnaliseDataFetch(analiseId, setAnalise);
@@ -357,8 +410,13 @@ export const PHContentHandler = {
 			}
 
 			if (data) {
-				Alert.alert("Sucesso!", "Livro cadastrado com sucesso.");
+				if (Platform.OS === "web") {
+					window.alert("Sucesso! Livro cadastrado com sucesso.");
+				} else {
+					Alert.alert("Sucesso!", "Livro cadastrado com sucesso.");
+				}
 
+				router.back();
 				router.push({
 					pathname: "/analise/create-analise",
 					params: { livroId: data.id, tituloLivro: data.titulo },

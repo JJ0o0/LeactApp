@@ -74,7 +74,7 @@ export const PHContentService = {
 				`
             *,
             Perfil:usuario_id (nome, foto_url),
-            Livros:livro_id (titulo),
+            Livros:livro_id (titulo, autor, capa_url),
             Comentarios (
                 *,
                 Perfil:usuario_id (nome, foto_url) 
@@ -181,7 +181,7 @@ export const PHContentService = {
 					autor: autor,
 					capa_url: capa_url,
 					isbn: isbn,
-					created_by: user?.id,
+					criado_por: user?.id,
 				},
 			])
 			.select()

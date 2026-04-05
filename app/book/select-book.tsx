@@ -28,6 +28,8 @@ export default function SelectBook() {
 	}, [search]);
 
 	const handleSelect = (book: any) => {
+		router.back();
+		router.back();
 		router.push({
 			pathname: "/analise/create-analise",
 			params: { livroId: book.id, tituloLivro: book.titulo },
@@ -108,9 +110,7 @@ export default function SelectBook() {
 							</Text>
 							<TouchableOpacity
 								style={styles.addButton}
-								onPress={() =>
-									router.push("/analise/create-book")
-								}
+								onPress={() => router.push("/book/create-book")}
 							>
 								<Text style={styles.addButtonText}>
 									+ Cadastrar Novo Livro
