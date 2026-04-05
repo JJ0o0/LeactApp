@@ -35,7 +35,9 @@ export default function Login() {
 			style={styles.container}
 			behavior={Platform.OS === "ios" ? "padding" : "padding"}
 		>
-			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+			<TouchableWithoutFeedback
+				onPress={Platform.OS !== "web" ? Keyboard.dismiss : () => {}}
+			>
 				<View style={[styles.container, { width: "100%", flex: 1 }]}>
 					<Image
 						source={require("@/assets/user/signupLogo.png")}

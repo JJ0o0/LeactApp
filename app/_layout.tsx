@@ -18,8 +18,10 @@ export default function RootLayout() {
 			const isRoot = currentPath === "";
 
 			if (!session && !inAuthGroup && !isRoot) {
+				router.back();
 				router.replace("/");
 			} else if (session && (inAuthGroup || isRoot)) {
+				router.back();
 				router.replace("/(tabs)");
 			}
 

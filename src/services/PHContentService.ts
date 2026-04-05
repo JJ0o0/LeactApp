@@ -1,4 +1,5 @@
 import { User } from "@supabase/supabase-js";
+import { Platform } from "react-native";
 import { supabase } from "../utils/SupabaseConnection";
 
 export const PHContentService = {
@@ -100,6 +101,29 @@ export const PHContentService = {
 
 		return { data, error };
 	},
+	async getAnalisesByBookId(bookId: string) {
+		try {
+			const { data, error } = await supabase
+				.from("Analises")
+				.select(
+					`
+                *,
+                Perfil:usuario_id (
+                    nome,
+                    foto_url
+                )
+            `,
+				)
+				.eq("livro_id", bookId)
+				.order("created_at", { ascending: false });
+
+			if (error) throw error;
+			return { success: true, data };
+		} catch (error) {
+			console.error("Erro ao buscar análises:", error);
+			return { success: false, data: [] };
+		}
+	},
 	async getUserAnalises(user: User | null) {
 		if (!user) {
 			return;
@@ -189,6 +213,41 @@ export const PHContentService = {
 
 		return { data, error };
 	},
+	async deleteBook(bookId: string) {
+		try {
+			const { error } = await supabase
+				.from("Livros")
+				.delete()
+				.eq("id", bookId);
+
+			if (error) throw error;
+			return { success: true };
+		} catch (error) {
+			console.error("Erro ao deletar livro:", error);
+			return { success: false };
+		}
+	},
+	async getBookById(id: string) {
+		const { data, error } = await supabase
+			.from("Livros")
+			.select(
+				`
+            *,
+            Perfil:criado_por (
+                nome,
+				foto_url
+            )
+        `,
+			)
+			.eq("id", id)
+			.single();
+
+		if (error) {
+			console.error("Erro no Service:", error.message);
+			return { success: false, data: null };
+		}
+		return { success: true, data };
+	},
 	async fetchBooks(searchTerm: string = "") {
 		let query = supabase.from("Livros").select("*");
 
@@ -199,9 +258,192 @@ export const PHContentService = {
 		const { data, error } = await query.limit(15);
 		return { data, error };
 	},
+	realtimeComments(id: string, callback: any) {
+		const randomId = Math.random().toString(36).substring(7);
+
+		return supabase
+			.channel(`comments_${id}_${randomId}`)
+			.on(
+				"postgres_changes",
+				{
+					event: "*",
+					schema: "public",
+					table: "Comentarios",
+					filter: `analise_id=eq.${id}`,
+				},
+				(payload) => {
+					console.log(
+						"Novo evento de comentário!",
+						payload.eventType,
+					);
+					callback(payload);
+				},
+			)
+			.subscribe();
+	},
+	realtimeFeed(callback: () => void) {
+		const channelId = `feed_${Math.random().toString(36).substring(7)}`;
+
+		const channel = supabase
+			.channel(channelId)
+			.on(
+				"postgres_changes",
+				{ event: "*", schema: "public", table: "Analises" },
+				() => {
+					console.log("Realtime: Mudança detectada no Feed");
+					callback();
+				},
+			)
+			.subscribe((status) => {
+				if (status !== "SUBSCRIBED") {
+					console.warn("Realtime: Status da inscrição:", status);
+				}
+			});
+
+		return channel;
+	},
+	realtimeUsers(callback: () => void) {
+		const randomId = Math.random().toString(36).substring(7);
+
+		return supabase
+			.channel(`users_channel_${randomId}`)
+			.on(
+				"postgres_changes",
+				{
+					event: "UPDATE",
+					schema: "public",
+					table: "Perfil",
+				},
+				(payload) => {
+					console.log("Mudança de perfil detectada!", payload);
+					callback();
+				},
+			)
+			.subscribe();
+	},
+	realtimeBooks(onUpdate: (payload: any) => void) {
+		return supabase
+			.channel("public:Livros")
+			.on(
+				"postgres_changes",
+				{
+					event: "*",
+					schema: "public",
+					table: "Livros",
+				},
+				(payload) => {
+					onUpdate(payload);
+				},
+			)
+			.subscribe();
+	},
 	async getUser() {
 		const { data } = await supabase.auth.getUser();
 
 		return data.user;
+	},
+	async getProfileAndLastReview() {
+		try {
+			const user = await this.getUser();
+			if (!user) return { success: false, error: "Usuário não logado" };
+
+			const { data: profile, error: profileError } = await supabase
+				.from("Perfil")
+				.select("*")
+				.eq("id", user.id)
+				.single();
+
+			const { data: lastReview } = await supabase
+				.from("Analises")
+				.select(`*, Livros (titulo, capa_url)`)
+				.eq("usuario_id", user.id)
+				.order("created_at", { ascending: false })
+				.limit(1)
+				.maybeSingle();
+
+			return {
+				success: true,
+				authData: user,
+				profileData: profile,
+				lastReview,
+			};
+		} catch (error) {
+			return { success: false, error };
+		}
+	},
+	async uploadAvatar(userId: string, fileUri: string) {
+		try {
+			const fileExt = fileUri.split(".").pop()?.toLowerCase() || "jpg";
+			const fileName = `${userId}-${Date.now()}.${fileExt}`;
+			const filePath = `avatars/${fileName}`;
+			const mimeType = `image/${fileExt === "png" ? "png" : "jpeg"}`;
+
+			let fileBody;
+
+			if (Platform.OS === "web") {
+				const response = await fetch(fileUri);
+				fileBody = await response.blob();
+			} else {
+				const formData = new FormData();
+				formData.append("files", {
+					uri:
+						Platform.OS === "ios"
+							? fileUri.replace("file://", "")
+							: fileUri,
+					name: fileName,
+					type: mimeType,
+				} as any);
+				fileBody = formData;
+			}
+
+			const { error: uploadError } = await supabase.storage
+				.from("perfil-fotos")
+				.upload(filePath, fileBody, {
+					contentType: mimeType,
+					upsert: true,
+				});
+
+			if (uploadError) throw uploadError;
+
+			const { data: urlData } = supabase.storage
+				.from("perfil-fotos")
+				.getPublicUrl(filePath);
+
+			return { success: true, url: urlData.publicUrl };
+		} catch (error) {
+			console.error("Erro detalhado no Upload:", error);
+			return { success: false, error };
+		}
+	},
+	async updateProfile(
+		userId: string,
+		updates: { nome: string; avatar_url?: string },
+	) {
+		const { error } = await supabase
+			.from("Perfil")
+			.update(updates)
+			.eq("id", userId);
+
+		return { success: !error, error };
+	},
+	async signOut() {
+		const { error } = await supabase.auth.signOut();
+		return { success: !error, error };
+	},
+	async deleteAccount(userId: string) {
+		try {
+			const { error: profileError } = await supabase
+				.from("Perfil")
+				.delete()
+				.eq("id", userId);
+
+			if (profileError) throw profileError;
+
+			await this.signOut();
+
+			return { success: true };
+		} catch (error) {
+			return { success: false, error };
+		}
 	},
 };

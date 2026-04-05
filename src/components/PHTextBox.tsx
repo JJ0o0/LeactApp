@@ -1,5 +1,6 @@
 import {
 	DimensionValue,
+	Platform,
 	StyleProp,
 	StyleSheet,
 	TextInput,
@@ -48,6 +49,7 @@ const PHTextBox = (props: Props) => {
 				defaultTextBoxSettings,
 				props.extraStyle,
 			]}
+			pointerEvents="auto"
 			value={props.value}
 			placeholder={props.placeholder}
 			placeholderTextColor={props.placeholderColor}
@@ -74,6 +76,13 @@ const styles = StyleSheet.create({
 		borderWidth: 2,
 		borderRadius: 15,
 		borderColor: PHColors.border,
+
+		...Platform.select({
+			web: {
+				outlineStyle: "none" as any,
+				cursor: "text" as any,
+			},
+		}),
 	},
 });
 

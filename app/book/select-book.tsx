@@ -1,13 +1,12 @@
+import PHBookCard from "@/src/components/Cards/PHBookCard";
 import PHTextBox from "@/src/components/PHTextBox";
 import { PHColors } from "@/src/constants/PHColors";
 import { PHContentHandler } from "@/src/services/PHContentHandler";
-import { FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
-	Image,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -27,7 +26,7 @@ export default function SelectBook() {
 		return () => clearTimeout(delay);
 	}, [search]);
 
-	const handleSelect = (book: any) => {
+	const onSelectBook = (book: any) => {
 		router.back();
 		router.back();
 		router.push({
@@ -60,48 +59,10 @@ export default function SelectBook() {
 					keyExtractor={(item) => item.id.toString()}
 					contentContainerStyle={styles.list}
 					renderItem={({ item }) => (
-						<TouchableOpacity
-							style={styles.bookItem}
-							onPress={() => handleSelect(item)}
-						>
-							<View style={styles.bookInfo}>
-								<View style={styles.coverWrapper}>
-									{item.capa_url ? (
-										<Image
-											source={{ uri: item.capa_url }}
-											style={styles.bookCover}
-											resizeMode="cover"
-										/>
-									) : (
-										<FontAwesome
-											name="book"
-											size={20}
-											color={PHColors.border}
-										/>
-									)}
-								</View>
-
-								<View style={{ flex: 1 }}>
-									<Text
-										style={styles.bookTitle}
-										numberOfLines={1}
-									>
-										{item.titulo}
-									</Text>
-									<Text
-										style={styles.bookAuthor}
-										numberOfLines={1}
-									>
-										{item.autor}
-									</Text>
-								</View>
-							</View>
-							<FontAwesome
-								name="chevron-right"
-								size={14}
-								color={PHColors.placeholder}
-							/>
-						</TouchableOpacity>
+						<PHBookCard
+							item={item}
+							onPressed={() => onSelectBook(item)}
+						/>
 					)}
 					ListEmptyComponent={
 						<View style={styles.emptyContainer}>
@@ -134,37 +95,6 @@ const styles = StyleSheet.create({
 		marginBottom: 15,
 	},
 	list: { paddingHorizontal: 25, paddingBottom: 40 },
-	bookItem: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-		backgroundColor: "rgba(255,255,255,0.05)",
-		padding: 12,
-		borderRadius: 12,
-		marginBottom: 12,
-	},
-	bookInfo: { flexDirection: "row", alignItems: "center", gap: 15, flex: 1 },
-
-	coverWrapper: {
-		width: 45,
-		height: 65,
-		backgroundColor: "rgba(255,255,255,0.05)",
-		borderRadius: 6,
-		justifyContent: "center",
-		alignItems: "center",
-		overflow: "hidden",
-	},
-	bookCover: {
-		width: "100%",
-		height: "100%",
-	},
-
-	bookTitle: {
-		color: PHColors.text,
-		fontSize: 16,
-		fontWeight: "600",
-	},
-	bookAuthor: { color: PHColors.placeholder, fontSize: 13, marginTop: 2 },
 	emptyContainer: { alignItems: "center", marginTop: 40 },
 	emptyText: { color: PHColors.text, fontSize: 16, marginBottom: 15 },
 	addButton: {

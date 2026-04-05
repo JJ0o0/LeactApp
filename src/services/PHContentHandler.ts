@@ -1,3 +1,4 @@
+import * as ImagePicker from "expo-image-picker";
 import { Router } from "expo-router";
 import { Alert, Platform } from "react-native";
 import { PHUtils } from "../utils/PHUtils";
@@ -123,10 +124,16 @@ export const PHContentHandler = {
 				Alert.alert("Erro", error.message);
 			}
 		} else {
-			Alert.alert(
-				"Sucesso",
-				"Link de recuperação enviado para o seu e-mail!",
-			);
+			if (Platform.OS === "web") {
+				window.alert(
+					"Sucesso! Link de recuperação enviado para o seu e-mail!",
+				);
+			} else {
+				Alert.alert(
+					"Sucesso",
+					"Link de recuperação enviado para o seu e-mail!",
+				);
+			}
 
 			router.back();
 		}
@@ -171,6 +178,44 @@ export const PHContentHandler = {
 		}
 
 		setLoading(false);
+	},
+	handleLogout(router: any) {
+		const performLogout = async () => {
+			const { success } = await PHContentService.signOut();
+			if (success) router.replace("/");
+		};
+
+		if (Platform.OS === "web") {
+			if (window.confirm("Deseja realmente sair da conta?"))
+				performLogout();
+		} else {
+			Alert.alert("Sair", "Deseja realmente encerrar a sessão?", [
+				{ text: "Cancelar", style: "cancel" },
+				{ text: "Sair", style: "destructive", onPress: performLogout },
+			]);
+		}
+	},
+	handleDeleteAccount(userId: string, router: any) {
+		const performDelete = async () => {
+			const { success } = await PHContentService.deleteAccount(userId);
+			if (success) router.replace("/");
+		};
+
+		const message =
+			"ATENÇÃO: Isso apagará permanentemente seu perfil e todas as suas análises. Esta ação não pode ser desfeita.";
+
+		if (Platform.OS === "web") {
+			if (window.confirm(message)) performDelete();
+		} else {
+			Alert.alert("DELETAR CONTA", message, [
+				{ text: "Cancelar", style: "cancel" },
+				{
+					text: "DELETAR TUDO",
+					style: "destructive",
+					onPress: performDelete,
+				},
+			]);
+		}
 	},
 	//#endregion
 	//#region Manuseamento de Data do Feed
@@ -317,6 +362,15 @@ export const PHContentHandler = {
 
 		setLoading(false);
 	},
+	async handleFetchBookAnalises(
+		bookId: string,
+		setAnalises: React.Dispatch<React.SetStateAction<any[]>>,
+	) {
+		const result = await PHContentService.getAnalisesByBookId(bookId);
+		if (result.success) {
+			setAnalises(result.data);
+		}
+	},
 	async handleDeleteUserAnalise(
 		id: string,
 		setMyAnalises: React.Dispatch<React.SetStateAction<any[]>>,
@@ -379,7 +433,12 @@ export const PHContentHandler = {
 		const { error } = await PHContentService.deleteComment(commentId);
 
 		if (!error) {
-			this.handleAnaliseDataFetch(analiseId, setAnalise);
+			setAnalise((prev: { Comentarios: any[] }) => ({
+				...prev,
+				Comentarios: prev.Comentarios.filter(
+					(c: { id: string }) => c.id !== commentId,
+				),
+			}));
 		}
 	},
 	async handleCreateBook(
@@ -389,6 +448,7 @@ export const PHContentHandler = {
 			capa_url: string;
 			isbn: string;
 		},
+		fromAnalise: boolean,
 		router: Router,
 		setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 	) {
@@ -417,16 +477,67 @@ export const PHContentHandler = {
 				}
 
 				router.back();
-				router.push({
-					pathname: "/analise/create-analise",
-					params: { livroId: data.id, tituloLivro: data.titulo },
-				});
+
+				if (fromAnalise) {
+					router.push({
+						pathname: "/analise/create-analise",
+						params: { livroId: data.id, tituloLivro: data.titulo },
+					});
+				}
 			}
 		} catch (error: any) {
 			Alert.alert("Erro ao cadastrar", error.message);
 		} finally {
 			setLoading(false);
 		}
+	},
+	async handleDeleteBook(bookId: string, onSuccess: () => void) {
+		if (Platform.OS === "web") {
+			if (
+				window.confirm(
+					"Tem certeza? Isso apagará o livro e todas as análises permanentemente.",
+				)
+			) {
+				const result = await PHContentService.deleteBook(bookId);
+				if (result.success) onSuccess();
+			}
+
+			return;
+		}
+
+		Alert.alert(
+			"Excluir Livro",
+			"Tem certeza? Isso apagará o livro e todas as análises permanentemente.",
+			[
+				{ text: "Cancelar", style: "cancel" },
+				{
+					text: "Excluir",
+					style: "destructive",
+					onPress: async () => {
+						const result =
+							await PHContentService.deleteBook(bookId);
+						if (result.success) onSuccess();
+					},
+				},
+			],
+		);
+	},
+	async handleGetBookDetails(
+		id: string,
+		setBook: React.Dispatch<React.SetStateAction<any>>,
+		setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+	) {
+		setLoading(true);
+
+		const result = await PHContentService.getBookById(id);
+
+		if (result.success && result.data) {
+			setBook(result.data);
+		} else {
+			console.error("Handler: Falha ao setar o livro");
+		}
+
+		setLoading(false);
 	},
 	async handleFetchBooks(
 		term: string,
@@ -446,6 +557,112 @@ export const PHContentHandler = {
 			console.error("Erro ao buscar livros:", error);
 		} finally {
 			setLoading(false);
+		}
+	},
+	//#endregion
+	//#region REALTIME
+	handleRealtimeComments(id: string, setAnalise: React.Dispatch<any>) {
+		return PHContentService.realtimeComments(id, () => {
+			this.handleAnaliseDataFetch(id, setAnalise);
+		});
+	},
+	handleRealtimeFeed(
+		setAnalises: React.Dispatch<React.SetStateAction<any[]>>,
+	) {
+		return PHContentService.realtimeFeed(() => {
+			this.handleFeedDataLoading(
+				setAnalises,
+				() => {},
+				() => {},
+			);
+		});
+	},
+	handleRealtimeUsers(
+		setAnalises: React.Dispatch<React.SetStateAction<any[]>>,
+	) {
+		return PHContentService.realtimeUsers(() => {
+			this.handleFeedDataLoading(
+				setAnalises,
+				() => {},
+				() => {},
+			);
+		});
+	},
+	handleRealtimeBooks(
+		search: string,
+		setBooks: React.Dispatch<React.SetStateAction<any[]>>,
+		setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+	) {
+		return PHContentService.realtimeBooks((payload) => {
+			console.log("Mudança real-time detectada:", payload.eventType);
+			this.handleFetchBooks(search, setBooks, setLoading);
+		});
+	},
+	async handleFetchProfileData(
+		setUserData: (data: any) => void,
+		setLastReview: (data: any) => void,
+		setLoading: (loading: boolean) => void,
+	) {
+		setLoading(true);
+		const result = await PHContentService.getProfileAndLastReview();
+
+		if (result.success) {
+			const unifiedUser = {
+				...result.profileData,
+				accountCreated: result.authData?.created_at,
+			};
+			setUserData(unifiedUser);
+			setLastReview(result.lastReview);
+		}
+		setLoading(false);
+	},
+	async handlePickImage(setImage: (uri: string) => void) {
+		const result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ["images"],
+			allowsEditing: true,
+			aspect: [1, 1],
+			quality: 0.5,
+		});
+
+		if (!result.canceled) {
+			setImage(result.assets[0].uri);
+		}
+	},
+	async handleSaveProfile(
+		userId: string,
+		nome: string,
+		newImageUri: string | null,
+		onSuccess: () => void,
+	) {
+		let updates: any = { nome };
+
+		if (newImageUri && !newImageUri.startsWith("http")) {
+			const uploadResult = await PHContentService.uploadAvatar(
+				userId,
+				newImageUri,
+			);
+
+			if (uploadResult.success) {
+				console.log("URL gerada com sucesso:", uploadResult.url);
+				updates.foto_url = uploadResult.url;
+			} else {
+				Alert.alert("Erro", "Falha ao subir imagem.");
+				return;
+			}
+		}
+
+		console.log("Enviando updates para o banco:", updates);
+
+		const result = await PHContentService.updateProfile(userId, updates);
+
+		if (result.success) {
+			onSuccess();
+		} else {
+			console.error("Erro ao atualizar tabela Perfil:", result.error);
+			Alert.alert(
+				"Erro",
+				"Não foi possível atualizar os dados do perfil.",
+			);
 		}
 	},
 	async handleGetUser(setUserData: React.Dispatch<any>) {

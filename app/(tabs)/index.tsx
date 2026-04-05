@@ -4,6 +4,7 @@ import PHTextBox from "@/src/components/PHTextBox";
 import { PHColors } from "@/src/constants/PHColors";
 import { PHContentHandler } from "@/src/services/PHContentHandler";
 import { PHUtils } from "@/src/utils/PHUtils";
+import { supabase } from "@/src/utils/SupabaseConnection";
 import { FontAwesome } from "@expo/vector-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -52,6 +53,14 @@ export default function Main() {
 
 	useEffect(() => {
 		loadData();
+
+		const feedChannel = PHContentHandler.handleRealtimeFeed(setAnalises);
+		const usersChannel = PHContentHandler.handleRealtimeUsers(setAnalises);
+
+		return () => {
+			if (feedChannel) supabase.removeChannel(feedChannel);
+			if (usersChannel) supabase.removeChannel(usersChannel);
+		};
 	}, []);
 
 	useFocusEffect(
@@ -86,7 +95,11 @@ export default function Main() {
 	return (
 		<View style={styles.container}>
 			<Stack.Screen
-				options={{ headerShown: true, headerBackVisible: false }}
+				options={{
+					headerShown: true,
+					headerBackVisible: false,
+					headerBackButtonMenuEnabled: false,
+				}}
 			/>
 			<View style={styles.searchWrapper}>
 				<PHTextBox

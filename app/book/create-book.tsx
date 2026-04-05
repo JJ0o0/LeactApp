@@ -2,7 +2,7 @@ import PHButton from "@/src/components/Buttons/PHButton";
 import PHTextBox from "@/src/components/PHTextBox";
 import { PHColors } from "@/src/constants/PHColors";
 import { PHContentHandler } from "@/src/services/PHContentHandler";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
 	KeyboardAvoidingView,
@@ -16,6 +16,7 @@ import {
 export default function CreateBook() {
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
+	const { from } = useLocalSearchParams();
 
 	const [form, setForm] = useState({
 		titulo: "",
@@ -25,7 +26,12 @@ export default function CreateBook() {
 	});
 
 	const onCreateBookPressed = () => {
-		PHContentHandler.handleCreateBook(form, router, setLoading);
+		PHContentHandler.handleCreateBook(
+			form,
+			from !== undefined && from !== "books",
+			router,
+			setLoading,
+		);
 	};
 
 	return (

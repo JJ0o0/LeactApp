@@ -2,6 +2,7 @@ import PHCommentCard from "@/src/components/Cards/PHCommentCard";
 import { PHColors } from "@/src/constants/PHColors";
 import { PHContentHandler } from "@/src/services/PHContentHandler";
 import { PHUtils } from "@/src/utils/PHUtils";
+import { supabase } from "@/src/utils/SupabaseConnection";
 import { FontAwesome } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
@@ -96,8 +97,18 @@ export default function AnaliseInfo() {
 
 	useEffect(() => {
 		getUser();
-
 		PHContentHandler.handleAnaliseDataFetch(id as string, setAnalise);
+
+		const commentChannel = PHContentHandler.handleRealtimeComments(
+			id as string,
+			setAnalise,
+		);
+
+		return () => {
+			if (commentChannel) {
+				supabase.removeChannel(commentChannel);
+			}
+		};
 	}, [id]);
 
 	if (!analise) {
@@ -115,7 +126,10 @@ export default function AnaliseInfo() {
 	const titulo = dadosLivro?.titulo || analise?.titulo || "Livro sem título";
 	const autorLivro =
 		dadosLivro?.autor || analise?.autor || "Autor Desconhecido";
-	const fotoLivro = dadosLivro?.capa_url || analise?.capa_url || "";
+	const fotoLivro =
+		dadosLivro?.capa_url ||
+		analise?.capa_url ||
+		"https://placehold.co/250x400/png?text=Sem+Imagem";
 
 	const nota = analise?.nota || 0;
 	const nomeAutor = analise?.Perfil?.nome || "Usuário Desconhecido";
@@ -285,7 +299,8 @@ const styles = StyleSheet.create({
 	},
 	bookCover: {
 		width: "60%",
-		height: 300,
+		maxWidth: 250,
+		height: 350,
 		alignSelf: "center",
 		marginBottom: 20,
 		borderWidth: 6,

@@ -1,5 +1,8 @@
 import { PHColors } from "@/src/constants/PHColors";
 import { FontAwesome } from "@expo/vector-icons";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { faUserGear } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
@@ -48,11 +51,7 @@ export default function TabLayout() {
 				options={{
 					title: "Suas Análises",
 					tabBarIcon: ({ color }) => (
-						<FontAwesome
-							name="user-circle"
-							size={24}
-							color={color}
-						/>
+						<FontAwesome name="bookmark" size={24} color={color} />
 					),
 				}}
 			/>
@@ -68,22 +67,12 @@ export default function TabLayout() {
 			/>
 
 			<Tabs.Screen
-				name="usuarios"
-				options={{
-					title: "Comunidade",
-					tabBarIcon: ({ color }) => (
-						<FontAwesome name="users" size={24} color={color} />
-					),
-				}}
-			/>
-
-			<Tabs.Screen
 				name="perfil"
 				options={{
 					title: "Meu Perfil",
 					tabBarIcon: ({ color }) => (
-						<FontAwesome
-							name="user-circle"
+						<FontAwesomeIcon
+							icon={faUserGear as IconDefinition}
 							size={24}
 							color={color}
 						/>

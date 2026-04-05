@@ -29,7 +29,10 @@ export default function UserAnalises() {
 
 	const handleDelete = (id: string) => {
 		if (Platform.OS === "web") {
-			PHContentHandler.handleDeleteUserAnalise(id, setMyAnalises);
+			if (window.confirm("Deseja mesmo apagar sua publicação?")) {
+				PHContentHandler.handleDeleteUserAnalise(id, setMyAnalises);
+			}
+
 			return;
 		}
 
