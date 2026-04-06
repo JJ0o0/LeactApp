@@ -1,6 +1,7 @@
 import { User } from "@supabase/supabase-js";
 import { Platform } from "react-native";
 import { supabase } from "../utils/SupabaseConnection";
+import { PHUserService } from "./PHUserService";
 
 export const PHContentService = {
 	async fetchFeed() {
@@ -40,7 +41,7 @@ export const PHContentService = {
 		return { data, error };
 	},
 	async createAnalise(livroId: string, conteudo: string, nota: number) {
-		const user = await this.getUser();
+		const user = await PHUserService.getUser();
 
 		if (!user) {
 			throw new Error("Usuário não autenticado");
@@ -124,29 +125,6 @@ export const PHContentService = {
 			return { success: false, data: [] };
 		}
 	},
-	async getUserAnalises(user: User | null) {
-		if (!user) {
-			return;
-		}
-
-		const { data, error } = await supabase
-			.from("Analises")
-			.select(
-				`
-                id, 
-                conteudo, 
-                nota, 
-                created_at,
-                Perfil (nome, foto_url),
-                Livros (titulo),
-                Comentarios (count)
-            `,
-			)
-			.eq("usuario_id", user.id)
-			.order("created_at", { ascending: false });
-
-		return { data, error };
-	},
 	async deleteAnalise(id: string) {
 		const { data, error } = await supabase
 			.from("Analises")
@@ -196,7 +174,7 @@ export const PHContentService = {
 		capa_url: string,
 		isbn: string,
 	) {
-		const user = await this.getUser();
+		const user = await PHUserService.getUser();
 		const { data, error } = await supabase
 			.from("Livros")
 			.insert([
@@ -336,40 +314,6 @@ export const PHContentService = {
 				},
 			)
 			.subscribe();
-	},
-	async getUser() {
-		const { data } = await supabase.auth.getUser();
-
-		return data.user;
-	},
-	async getProfileAndLastReview() {
-		try {
-			const user = await this.getUser();
-			if (!user) return { success: false, error: "Usuário não logado" };
-
-			const { data: profile, error: profileError } = await supabase
-				.from("Perfil")
-				.select("*")
-				.eq("id", user.id)
-				.single();
-
-			const { data: lastReview } = await supabase
-				.from("Analises")
-				.select(`*, Livros (titulo, capa_url)`)
-				.eq("usuario_id", user.id)
-				.order("created_at", { ascending: false })
-				.limit(1)
-				.maybeSingle();
-
-			return {
-				success: true,
-				authData: user,
-				profileData: profile,
-				lastReview,
-			};
-		} catch (error) {
-			return { success: false, error };
-		}
 	},
 	async uploadAvatar(userId: string, fileUri: string) {
 		try {

@@ -1,7 +1,7 @@
 import PHIconButton from "@/src/components/Buttons/PHIconButton";
 import { PHColors } from "@/src/constants/PHColors";
 import { PHContentHandler } from "@/src/services/PHContentHandler";
-import { PHContentService } from "@/src/services/PHContentService";
+import { PHUserService } from "@/src/services/PHUserService"
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
 	faRightFromBracket,
@@ -17,7 +17,7 @@ export default function SettingsScreen() {
 	const router = useRouter();
 
 	useEffect(() => {
-		PHContentService.getUser().then(setUser);
+		PHUserService.getUser().then(setUser);
 	}, []);
 
 	const isGoogleProvider = user?.app_metadata?.provider === "google";

@@ -3,6 +3,7 @@ import { Router } from "expo-router";
 import { Alert, Platform } from "react-native";
 import { PHUtils } from "../utils/PHUtils";
 import { PHContentService } from "./PHContentService";
+import { PHUserService } from "./PHUserService";
 import { PHUserManagement } from "./PHUserManagement";
 
 export const PHContentHandler = {
@@ -351,8 +352,8 @@ export const PHContentHandler = {
 		setMyAnalises: React.Dispatch<React.SetStateAction<any[]>>,
 		setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 	) {
-		const user = await PHContentService.getUser();
-		const response = await PHContentService.getUserAnalises(user);
+		const user = await PHUserService.getUser();
+		const response = await PHUserService.getUserAnalises(user);
 
 		if (response && !response.error) {
 			setMyAnalises(response.data || []);
@@ -604,7 +605,7 @@ export const PHContentHandler = {
 		setLoading: (loading: boolean) => void,
 	) {
 		setLoading(true);
-		const result = await PHContentService.getProfileAndLastReview();
+		const result = await PHUserService.getProfileAndLastReview();
 
 		if (result.success) {
 			const unifiedUser = {
@@ -666,7 +667,7 @@ export const PHContentHandler = {
 		}
 	},
 	async handleGetUser(setUserData: React.Dispatch<any>) {
-		const user = await PHContentService.getUser();
+		const user = await PHUserService.getUser();
 
 		setUserData(user);
 	},

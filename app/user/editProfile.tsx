@@ -2,7 +2,7 @@ import PHIconButton from "@/src/components/Buttons/PHIconButton";
 import PHTextBox from "@/src/components/PHTextBox";
 import { PHColors } from "@/src/constants/PHColors";
 import { PHContentHandler } from "@/src/services/PHContentHandler";
-import { PHContentService } from "@/src/services/PHContentService";
+import { PHUserService } from "@/src/services/PHUserService"
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faCamera, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { Image } from "expo-image";
@@ -29,11 +29,11 @@ export default function EditProfile() {
 
 	useEffect(() => {
 		const loadInitialData = async () => {
-			const u = await PHContentService.getUser();
+			const u = await PHUserService.getUser();
 			if (u) {
 				setUser(u);
 
-				const result = await PHContentService.getProfileAndLastReview();
+				const result = await PHUserService.getProfileAndLastReview();
 
 				if (result.success && result.profileData) {
 					setNome(result.profileData.nome || "");

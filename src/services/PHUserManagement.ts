@@ -18,6 +18,7 @@ export const PHUserManagement = {
 				password,
 				options: {
 					data: { nome: name },
+					emailRedirectTo: 'leactapp://login-callback'
 				},
 			});
 
